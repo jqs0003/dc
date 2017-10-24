@@ -4,6 +4,8 @@ namespace app\common\controller;
 use think\Request;
 use think\controller\Rest;
 use think\Loader;
+use think\Response;
+
 class Restful extends Rest
 {
     protected $model='';
@@ -32,8 +34,8 @@ class Restful extends Rest
         } else {
             $data = $model->where(array('status'=>1))->paginate(10);
         }
-        $data = empty($data)?:$data->toArray();
-        return $this->response($data);
+        $data = empty($data)?$data:$data->toArray();
+        Response::create(array('data'=>$data, 'code'=>200, 'msg'=>'查询成功'), 'json', 200)->send();
     }
 
     public function add(){
@@ -42,14 +44,15 @@ class Restful extends Rest
 
         $validate = Loader::validate($this->model);
         if(!$validate->check($param)){
-            return json(["status"=>0, 'msg'=>$validate->getError()]);
+            Response::create(array('code'=>-1, 'msg'=>$validate->getError()), 'json', 200)->send();
+            exit;
         }
 
         unset($param['id']);
         if($model->save($param)){
-            return json(["status"=>1]);
+            Response::create(array('code'=>200, 'msg'=>'插入成功'), 'json', 200)->send();
         }else{
-            return json(["status"=>0]);
+            Response::create(array('code'=>-1, 'msg'=>'插入失败'), 'json', 200)->send();
         }
     }
 
@@ -58,18 +61,20 @@ class Restful extends Rest
         $data = $model->where(array('id'=>$id, 'status'=>1))->find();
         if (!$data)
         {
-            return $this->response(array(), 'json', 200);
+            Response::create(array('code'=>-1, 'msg'=>'没有找到需要修改的数据'), 'json', 200)->send();
+            exit;
         }
         $param=Request::instance()->param();
         $validate = Loader::validate($this->model);
         if(!$validate->check($param)){
-            return json(["status"=>0, 'msg'=>$validate->getError()]);
+            Response::create(array('code'=>-1, 'msg'=>$validate->getError()), 'json', 200)->send();
+            exit;
         }
 
         if($model->where("id",$id)->update($param)){
-            return json(["status"=>1]);
+            Response::create(array('code'=>200, 'msg'=>'修改成功'), 'json', 200)->send();
         }else{
-            return json(["status"=>0]);
+            Response::create(array('code'=>-1, 'msg'=>'修改失败'), 'json', 200)->send();
         }
     }
     public function delete($id){
@@ -78,12 +83,13 @@ class Restful extends Rest
         $data = $model->where(array('id'=>$id, 'status'=>1))->find();
         if (!$data)
         {
-            return json(["status"=>1]);
+            Response::create(array('code'=>-1, 'msg'=>'没有找到需要删除的数据'), 'json', 200)->send();
+            exit;
         }
         if($model->where("id",$id)->update(array('status'=>0))){
-            return json(["status"=>1]);
+            Response::create(array('code'=>200, 'msg'=>'删除成功'), 'json', 200)->send();
         }else{
-            return json(["status"=>0]);
+            Response::create(array('code'=>-1, 'msg'=>'删除失败'), 'json', 200)->send();
         }
     }
 }
