@@ -11,7 +11,7 @@ namespace app\api\controller;
 
 use think\controller;
 use app\api\controller\Wxpay;
-class WxpayAction extends controller
+class Wx extends controller
 {
     public function index($order_no='2017020453102495'){
         $wxpay = new Wxpay();

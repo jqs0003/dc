@@ -8,6 +8,6 @@
 namespace app\api\controller;
 
 use app\common\controller\Restful;
-class Test extends Restful
+class Category extends Restful
 {
 }

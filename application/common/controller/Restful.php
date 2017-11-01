@@ -5,10 +5,12 @@ use think\Request;
 use think\controller\Rest;
 use think\Loader;
 use think\Response;
+use think\Session;
 
 class Restful extends Rest
 {
     protected $model='';
+
     public function rest($id=''){
         $this->model = Request::instance()->controller();
         switch ($this->method){
@@ -26,7 +28,8 @@ class Restful extends Rest
                 break;
         }
     }
-    public function read($id){
+    public function read($id)
+    {
         $model = model($this->model);
         if ( $id)
         {
@@ -38,7 +41,8 @@ class Restful extends Rest
         Response::create(array('data'=>$data, 'code'=>200, 'msg'=>'查询成功'), 'json', 200)->send();
     }
 
-    public function add(){
+    public function add()
+    {
         $model = model($this->model);
         $param=Request::instance()->param();//获取当前请求的所有变量（经过过滤）
 
@@ -48,15 +52,17 @@ class Restful extends Rest
             exit;
         }
 
+        $param['create_time'] = time();
         unset($param['id']);
         if($model->save($param)){
-            Response::create(array('code'=>200, 'msg'=>'插入成功'), 'json', 200)->send();
+            Response::create(array('code'=>200, 'msg'=>'添加成功'), 'json', 200)->send();
         }else{
-            Response::create(array('code'=>-1, 'msg'=>'插入失败'), 'json', 200)->send();
+            Response::create(array('code'=>-1, 'msg'=>'添加失败'), 'json', 200)->send();
         }
     }
 
-    public function update($id){
+    public function update($id)
+    {
         $model = model($this->model);
         $data = $model->where(array('id'=>$id, 'status'=>1))->find();
         if (!$data)
@@ -77,8 +83,8 @@ class Restful extends Rest
             Response::create(array('code'=>-1, 'msg'=>'修改失败'), 'json', 200)->send();
         }
     }
-    public function delete($id){
-
+    public function delete($id)
+    {
         $model = model($this->model);
         $data = $model->where(array('id'=>$id, 'status'=>1))->find();
         if (!$data)
